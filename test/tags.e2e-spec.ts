@@ -13,12 +13,17 @@ import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter
 import { LoggingInterceptor } from '../src/common/interceptors/logging.interceptor';
 import { TransformInterceptor } from '../src/common/interceptors/transform.interceptor';
 import { RequestIdMiddleware } from '../src/common/middleware/request-id.middleware';
+import { execSync } from 'child_process';
 
 describe('Tags (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaClient;
 
   beforeAll(async () => {
+    // 使用独立的测试数据库并同步迁移
+    process.env.NODE_ENV = 'test';
+    process.env.DATABASE_URL = 'file:./test.db';
+    execSync('npx prisma migrate deploy', { stdio: 'inherit', env: { ...process.env, DATABASE_URL: 'file:./test.db' } });
     const mod: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
